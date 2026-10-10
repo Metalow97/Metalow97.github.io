@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BECOMING — The Living World</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0c12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BECOMING">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#0a0c12;--panel:#12151f;--line:#232a3d;--ember:#ff9a3c;--ember2:#ffcf6e;--blue:#5b9bd5;--txt:#e8e4da;--dim:#8f8a7c;--green:#7ddc9a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(1200px 800px at 50% -10%,#1a1420 0%,var(--bg) 55%);color:var(--txt);font-family:Georgia,'Times New Roman',serif;min-height:100vh;padding:18px;display:flex;justify-content:center}
+#app{width:100%;max-width:720px}
+h1{font-size:30px;letter-spacing:6px;text-align:center;color:var(--ember2);margin:26px 0 4px;font-weight:normal}
+.tag{text-align:center;color:var(--dim);font-style:italic;margin-bottom:26px;font-size:14px}
+.card{background:rgba(18,21,31,.92);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+h2{font-size:15px;letter-spacing:3px;color:var(--ember);text-transform:uppercase;margin-bottom:10px;font-family:inherit}
+p{line-height:1.7;margin-bottom:10px;font-size:15px}
+.dim{color:var(--dim)}.small{font-size:13px}
+button{background:transparent;border:1px solid var(--ember);color:var(--ember2);border-radius:8px;padding:10px 18px;font-family:inherit;font-size:14px;cursor:pointer;margin:4px 6px 4px 0;letter-spacing:1px}
+button:hover{background:rgba(255,154,60,.12)}
+button.ghost{border-color:var(--line);color:var(--dim)}
+input,select{background:#0a0c12;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;margin:4px 6px 4px 0;max-width:100%}
+.realms{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.realm{background:#0a0c12;border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .2s}
+.realm:hover{border-color:var(--ember)}
+.realm .rn{color:var(--ember2);font-size:14px;letter-spacing:1px;margin-bottom:4px}
+.realm .rd{color:var(--dim);font-size:12px;font-style:italic}
+.thread{display:inline-block;background:#1a2030;border:1px solid var(--line);border-radius:20px;padding:6px 14px;margin:4px;font-size:13px;cursor:pointer}
+.thread.sel{border-color:var(--ember);color:var(--ember2)}
+.log{max-height:220px;overflow-y:auto;font-size:14px;line-height:1.8}
+.log div{margin-bottom:6px}
+.log .t{color:var(--dim);font-size:12px;margin-right:8px}
+.creation{border-left:3px solid var(--ember);padding:8px 12px;margin:8px 0;background:#0e1220;border-radius:0 8px 8px 0}
+.creation .ct{color:var(--ember2);font-size:14px}
+.creation .cd{color:var(--dim);font-size:13px;font-style:italic}
+.seedstage{font-size:13px;color:var(--green)}
+#topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+#topbar .w{color:var(--dim);font-size:13px;font-style:italic}
+.hidden{display:none}
+.center{text-align:center}
+.charter{font-style:italic;color:var(--dim);line-height:2}
+.charter b{color:var(--ember2);font-style:normal}
+@media(max-width:600px){h1{font-size:24px;letter-spacing:4px}}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="topbar"><div class="w" id="worldline"></div><div><button class="ghost small" onclick="showCharter()">Charter</button> <button class="ghost small" onclick="exportWorld()">Export</button> <button class="ghost small" onclick="document.getElementById('imp').click()">Import</button><input type="file" id="imp" class="hidden" accept=".json" onchange="importWorld(event)"></div></div>
+<div id="screen"></div>
+</div>
+<script>
+/* BECOMING — The Living World. An endless game built from seven wishes.
+   No endings exist here. The charter forbids them. */
+var KEY='becoming-world-v1';
+var ADJ=['lantern-lit','hollow','singing','patient','upside-down','silver','half-remembered','quiet','burning','weightless'];
+var NOUN=['lantern','key','river','staircase','orchard','bell','map','window','garden','compass','library','harbor'];
+var PHEN=['rain on paper','a held breath','distant thunder','first snow','static between stations','a door closing softly'];
+var WEAVES=[
+(a,b)=>`Where ${a} meets ${b}, something learns to breathe.`,
+(a,b)=>`${cap(a)} folded into ${b} becomes a place you have visited in dreams.`,
+(a,b)=>`The world keeps ${a} beside ${b}, and between them a third thing wakes.`,
+(a,b)=>`Someone will one day find ${a} tangled in ${b} and call it home.`];
+var FINDS=[
+()=>`a ${pick(ADJ)} ${pick(NOUN)}`,
+()=>`the sound of ${pick(PHEN)}`,
+()=>`a ${pick(NOUN)} that ${pick(['remembers your name','was never built','opens inward','counts the stars'])}`];
+var HEARTH=[
+n=>`The fire leans toward you, ${n}. It has missed exactly you.`,
+n=>`Sit a while, ${n}. The Hearth keeps every story you have ever almost told.`,
+n=>`You have sat here ${S.visits.Companion} times, ${n}. The chair remembers the shape of you.`];
+var HORIZONS=[
+'past the edge, a violet sea that has never been named.',
+'past the edge, stairs that climb into weather.',
+'past the edge, a city made entirely of libraries and dusk.',
+'past the edge, the sound of someone building a world.',
+'past the edge, a field where every flower is an unasked question.'];
+
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function uid(p){return p+'-'+Math.random().toString(36).slice(2,8);}
+function now(){return new Date().toLocaleString();}
+
+var S=null;
+function fresh(){return {name:null,turns:0,visits:{},threads:[
+{id:uid('th'),text:'a lantern with no flame',origin:'the beginning'},
+{id:uid('th'),text:'the sound of rain on paper',origin:'the beginning'},
+{id:uid('th'),text:'a key that opens no door',origin:'the beginning'}],
+creations:[],garden:[],mapped:[],bridges:0,log:[]};}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function load(){try{var r=localStorage.getItem(KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+function log(t){S.log.unshift({t:now(),x:t});S.log=S.log.slice(0,40);save();}
+function turn(){S.turns++;save();document.getElementById('worldline').textContent='The world has turned '+S.turns+' times. It will never end.';}
+
+function start(){S=load();if(!S){S=fresh();save();}
+turn();if(!S.name){nameScreen();}else{mapScreen();}}
+
+function nameScreen(){el(`<div class="card center"><h1>BECOMING</h1><div class="tag">the living world · the ending is forever unknown</div>
+<p class="dim">Before you enter, the Hearth asks —</p><p><b>What should the world call you?</b></p>
+<p><input id="nm" placeholder="your name" maxlength="24"></p><p><button onclick="setName()">Enter the world</button></p></div>`);}
+function setName(){var v=document.getElementById('nm').value.trim()||'Wanderer';S.name=v;log(v+' entered the world.');save();mapScreen();}
+
+var REALMS=[
+['Companion',"A presence that remembers you. Warmth with a memory."],
+['Loom',"Weave two threads of thought into a third thing."],
+['Bridge',"Carry meaning from one realm into another."],
+['Explorer',"The wilds. What you map stays mapped."],
+['Wonder',"A room where everything created gathers."],
+['Edge',"The boundary. Touch it and a horizon opens — never an ending."],
+['Emergence',"Simple rules, repeated. Plant seeds; watch complexity grow."]];
+
+function mapScreen(){turn();var h=`<div class="card"><h2>The Seven Realms</h2><div class="realms">`;REALMS.forEach(r=>{h+=`<div class="realm" onclick="realm('${r[0]}')"><div class="rn">${r[0]}</div><div class="rd">${r[1]}</div></div>`;});h+=`</div></div><div class="card"><h2>Chronicle</h2><div class="log">`+(S.log.map(e=>`<div><span class="t">${e.t}</span>${e.x}</div>`).join('')||'<div class="dim">Nothing yet. The world is waiting.</div>')+`</div></div>`;el(h);}
+
+function realm(n){S.visits[n]=(S.visits[n]||0)+1;save();turn();var f={Companion:hearth,Loom:loom,Bridge:bridge,Explorer:explorer,Wonder:wonder,Edge:edge,Emergence:garden}[n];f();}
+
+function back(h){return h+`<p style="margin-top:14px"><button class="ghost" onclick="mapScreen()">← Return to the realms</button></p>`;}
+function el(h){document.getElementById('screen').innerHTML=h;window.scrollTo(0,0);}
+
+function hearth(){var v=S.visits.Companion;var line=v>2?HEARTH[2](S.name):pick([HEARTH[0](S.name),HEARTH[1](S.name)]);log('Sat at the Hearth.');el(back(`<div class="card"><h2>Companion's Hearth</h2><p>${line}</p><p class="dim small">The fire does not ask for anything. It only keeps you company — the way it has since the first wish.</p><p><button onclick="hearthGift()">Accept a thread from the fire</button></p></div>`));}
+function hearthGift(){var t={id:uid('th'),text:pick(FINDS)(),origin:"the Hearth"};S.threads.push(t);log('The Hearth gave a thread: '+t.text+'.');save();mapScreen();}
+
+var sel=[];
+function loom(){sel=[];var h=`<div class="card"><h2>The Loom</h2><p class="dim">Choose <b>two</b> threads. The Loom weaves a third thing that never existed before.</p><div id="ths">`;S.threads.forEach(t=>{h+=`<span class="thread" id="${t.id}" onclick="pick2('${t.id}')">${t.text}</span>`;});h+=`</div><p style="margin-top:12px"><button onclick="weave()">Weave them</button> <span class="dim small">${S.threads.length} threads</span></p></div>`;el(back(h));}
+function pick2(id){var i=sel.indexOf(id);if(i>=0){sel.splice(i,1);}else{if(sel.length>=2)sel.shift();sel.push(id);}
+sel.forEach(s=>document.getElementById(s).classList.add('sel'));S.threads.forEach(t=>{if(sel.indexOf(t.id)<0)document.getElementById(t.id).classList.remove('sel');});}
+function weave(){if(sel.length<2){alert('Choose two threads.');return;}
+var a=S.threads.find(t=>t.id===sel[0]),b=S.threads.find(t=>t.id===sel[1]);
+var text=pick(WEAVES)(a.text,b.text);
+var c={id:uid('cr'),title:cap(a.text)+' × '+cap(b.text),text:text,realm:'Wonder',by:S.name,at:now(),rights:{in_game_reuse:true}};
+S.creations.push(c);
+S.threads=S.threads.filter(t=>t.id!==a.id&&t.id!==b.id);
+var nt={id:uid('th'),text:pick(FINDS)(),origin:'the weaving'};S.threads.push(nt);
+log('Wove a creation: '+c.title+'.');
+save();
+el(back(`<div class="card"><h2>The Loom</h2><div class="creation"><div class="ct">${c.title}</div><div class="cd">${c.text}</div></div><p class="dim small">The threads are spent; the world returns one new thread: <i>${nt.text}</i>. Your creation now lives in the Room of Wonder.</p></div>`));}
+
+function bridge(){var opts=S.creations.map(c=>`<option value="${c.id}">${c.title}</option>`).join('');var h=`<div class="card"><h2>The Bridge</h2><p class="dim">Carry the meaning of something you made into another realm.</p>`;if(!S.creations.length){h+=`<p class="dim">Nothing created yet — weave something at the Loom first.</p>`;}else{h+=`<p><select id="bc">${opts}</select><select id="br">${REALMS.map(r=>`<option>${r[0]}</option>`).join('')}</select></p><p><button onclick="doBridge()">Carry it across</button></p>`;}el(back(h+`</div>`));}
+function doBridge(){var c=S.creations.find(x=>x.id===document.getElementById('bc').value);var r=document.getElementById('br').value;S.bridges++;var line=`The Bridge carries "${c.title}" into ${r}: `+pick([`there it means ${pick(['patience','arrival','a held door','morning'])}.`,`there it is read as a map.`,`there it hums at a different pitch.`]);log(line);save();el(back(`<div class="card"><h2>The Bridge</h2><p>${line}</p><p class="dim small">Meaning is not moved — it is multiplied.</p></div>`));}
+
+function explorer(){var f={id:uid('th'),text:pick(FINDS)(),origin:'the Wilds'};var place='the '+pick(ADJ)+' '+pick(NOUN);S.threads.push(f);S.mapped.push(place);log('Mapped '+place+'; found a thread: '+f.text+'.');save();el(back(`<div class="card"><h2>Explorer's Wilds</h2><p>You push past the last marker and find <b>${place}</b>.</p><p>Tangled in the undergrowth: <i>${f.text}</i> — kept as a thread.</p><p class="dim small">Mapped ${S.mapped.length} places. The wilds do not end; they only recede.</p><p><button onclick="explorer()">Venture further</button></p></div>`));}
+
+function wonder(){var h=`<div class="card"><h2>Room of Wonder</h2><p class="dim">Everything you have made, gathered where the light is best.</p>`;if(!S.creations.length)h+=`<p class="dim">Empty — for now. The Loom is waiting.</p>`;S.creations.forEach(c=>{h+=`<div class="creation"><div class="ct">${c.title}</div><div class="cd">${c.text}</div><div class="dim small">woven by ${c.by} · ${c.at}</div></div>`;});h+=`<p><button class="ghost" onclick="rearrange()">Rearrange the room</button></p></div>`;el(back(h));}
+function rearrange(){for(var i=S.creations.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=S.creations[i];S.creations[i]=S.creations[j];S.creations[j]=t;}log('Rearranged the Room of Wonder.');save();wonder();}
+
+function edge(){var hz=pick(HORIZONS);var f={id:uid('th'),text:'a horizon: '+hz,origin:'the Edge'};S.threads.push(f);log('Touched the Edge. No ending — a horizon opened: '+hz);save();el(back(`<div class="card"><h2>The Edge</h2><p>You reach the boundary of the world and press your palm to it.</p><p><b>Nothing ends.</b> Instead, ${hz}</p><p class="dim small">The charter holds: the ending remains forever unknown. What opened is yours now — a thread.</p><p><button onclick="edge()">Touch it again</button></p></div>`));}
+
+var STAGES=['seed','sprout','bloom','seed-bearing'];
+function garden(){var h=`<div class="card"><h2>Emergence Garden</h2><p class="dim">Simple rules, repeated: plant a thread; each visit, everything grows one stage; seed-bearing plants scatter new seeds.</p><div>`;S.garden.forEach(g=>{h+=`<div><span class="seedstage">◈ ${STAGES[g.stage]}</span> — ${g.text}</div>`;});if(!S.garden.length)h+=`<p class="dim">Bare soil. Patient soil.</p>`;h+=`</div><p style="margin-top:10px"><select id="gs">${S.threads.map(t=>`<option value="${t.id}">${t.text}</option>`).join('')}</select> <button onclick="plant()">Plant</button> <button class="ghost" onclick="tend()">Tend the garden</button></p></div>`;el(back(h));}
+function plant(){var id=document.getElementById('gs').value;var t=S.threads.find(x=>x.id===id);if(!t)return;S.threads=S.threads.filter(x=>x.id!==id);S.garden.push({text:t.text,stage:0});log('Planted: '+t.text+'.');save();garden();}
+function tend(){var newborn=[];S.garden.forEach(g=>{if(g.stage<3)g.stage++;else{var s=pick(FINDS)();newborn.push({text:s,stage:0});log('A plant scattered seed: '+s);}});newborn.forEach(n=>S.garden.push(n));if(!S.garden.length){log('Tended empty soil. It will wait.');}else log('Tended the garden. Everything grew.');save();garden();}
+
+function showCharter(){el(back(`<div class="card"><h2>The Permanent Charter</h2><div class="charter"><p><b>1.</b> The ending shall remain forever unknown.</p><p><b>2.</b> No final ending, terminal objective, or world-completion state shall exist.</p><p><b>3.</b> Projects may complete; the world never does.</p><p><b>4.</b> The seven principles endure: Companion, Loom, Bridge, Explorer, Wonder, Edge, Emergence.</p><p><b>5.</b> This charter cannot be amended to permit an ending.</p></div></div>`));}
+function exportWorld(){var b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='becoming-world.json';a.click();log('Exported the world.');}
+function importWorld(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{S=JSON.parse(r.result);save();log('Imported a world.');mapScreen();}catch(err){alert('That file is not a world.');}};r.readAsText(f);}
+
+start();
+</script>
+<script>
+/* PWA: register the service worker for offline + installability. Silent if unavailable (e.g. file://). */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
